@@ -229,6 +229,7 @@ nav ul ul li {
 
 .reddit .articleContent h3 { color: orangered }
 .mashable .articleContent h3 { color: #00aeef }
+.digg .articleContent h3 {color: #fd9127 }
 .articleContent h3 { color: #FE052C }
 
 .article .articleContent h6 {

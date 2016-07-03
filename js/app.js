@@ -11,6 +11,11 @@ var Feedr = {
     // create array to fill with articles
     articles: []
   },
+  // Digg Object
+  Digg: {
+    // create array to fill with articles
+    articles: []
+  },
 
   // Converts date/time to ISO
   convertDate : function (dateTime) {
@@ -94,6 +99,44 @@ var Feedr = {
       })
   },
 
+  // create a function to handle the json response
+  responseDigg : function(response) {
+      // cponsole log json response
+      console.log(response);
+      // something to do with closures... apparently the Feedr object isn't available inside the forEach function without the variable being defined here.
+      var self = this;
+
+      response.data.feed.forEach(function(result){
+
+        // push an object with all required article details for each article
+        self.Digg.articles.push({
+          featuredImage: result.content.media.images[0].url,
+          articleLink: result.content.url,
+          articleTitle: result.content.title,
+          articleCategory: result.content.tags[0].display,
+          impressions: result.digg_score,
+          // description: result.
+          // multiply by 1000 to adjust to milliseconds
+          dateTime: Feedr.convertDate(result.date_published * 1000)
+        });
+
+        // populate tamplate with article content
+        var articleContents = { sourceName: "digg",
+                                dateTime: Feedr.convertDate(result.date_published * 1000),
+                                featuredImage: result.content.media.images[0].url,
+                                articleLink: result.content.url,
+                                articleTitle: result.content.title,
+                                articleCategory: result.content.tags[0].display,
+                                impressions: result.digg_score
+        };
+
+        // complile and append template
+        var compiledTemplate = articleTemplate(articleContents);
+        $("#main").append(compiledTemplate)
+
+      })
+  },
+
   filterArticles : function(source) {
     $('#' + source).on("click", function(){
       $('.article').not('.' + source).hide();
@@ -127,30 +170,34 @@ $(function() {
 
     ajaxStart: function() {
        // Displays popUp while ajax is loading
-       $("#popUp").removeClass("hidden"); },
+       $("#popUp").removeClass("hidden");
+       $(".closePopUp").hide();
+    },
 
      ajaxStop: function() {
        // Hides popUp once ajax has loaded
        $("#popUp").addClass("hidden");
+       $(".closePopUp").show(); 
        // Sorts articles chronologically
        $(".article").sort(function(a,b){
-         return new Date($(a).attr("data-date")) > new Date($(b).attr("data-date"));
+         // Fixed this by swapping > for -. Not sure why this worked?
+         return new Date($(a).attr("data-date")) - new Date($(b).attr("data-date"));
        }).each(function(){
          $("#main").prepend(this);
        })
 
+       // Set up article filters
        Feedr.filterArticles("mashable");
        Feedr.filterArticles("reddit");
+       Feedr.filterArticles("digg");
        Feedr.showAllArticles();
 
      }
    });
 
-  // get json feed from Mashable. heroku proxy required for CORS issue. Jquery proxy required to reset context from window to Feedr.
+  // get json feeds from Mashable, Reddit and Digg. heroku proxy required for CORS issue. Jquery proxy required to reset context from window to Feedr.
   $.get('https://accesscontrolalloworiginall.herokuapp.com/http://mashable.com/stories.json', $.proxy(Feedr.responseMashable, Feedr));
   $.get('https://www.reddit.com/top.json', $.proxy(Feedr.responseReddit, Feedr));
-  
-
-
+  $.get('https://accesscontrolalloworiginall.herokuapp.com/http://digg.com/api/news/popular.json', $.proxy(Feedr.responseDigg, Feedr));
 
 });
