@@ -92,6 +92,21 @@ var Feedr = {
         $("#main").append(compiledTemplate)
 
       })
+  },
+
+  filterArticles : function(source) {
+    $('#' + source).on("click", function(){
+      $('.article').not('.' + source).hide();
+      $('.' + source).show();
+      $('#current-source').html(source);
+    })
+  },
+
+  showAllArticles : function() {
+    $('#feedr').on('click', function(){
+      $('.article').show();
+      $('#current-source').html('All');
+    })
   }
 
 };
@@ -109,8 +124,13 @@ $(function() {
 
   // Whenever an ajax call is made, while it is being made this will fire the loader animation.
   $(document).on({
-    ajaxStart: function() { $("#popUp").removeClass("hidden"); },
+
+    ajaxStart: function() {
+       // Displays popUp while ajax is loading
+       $("#popUp").removeClass("hidden"); },
+
      ajaxStop: function() {
+       // Hides popUp once ajax has loaded
        $("#popUp").addClass("hidden");
        // Sorts articles chronologically
        $(".article").sort(function(a,b){
@@ -118,13 +138,18 @@ $(function() {
        }).each(function(){
          $("#main").prepend(this);
        })
+
+       Feedr.filterArticles("mashable");
+       Feedr.filterArticles("reddit");
+       Feedr.showAllArticles();
+
      }
    });
 
   // get json feed from Mashable. heroku proxy required for CORS issue. Jquery proxy required to reset context from window to Feedr.
   $.get('https://accesscontrolalloworiginall.herokuapp.com/http://mashable.com/stories.json', $.proxy(Feedr.responseMashable, Feedr));
   $.get('https://www.reddit.com/top.json', $.proxy(Feedr.responseReddit, Feedr));
-
+  
 
 
 

@@ -180,6 +180,10 @@ nav ul ul li {
 	position: relative;
 }
 
+#current-source {
+  text-transform: capitalize;
+}
+
 /* Main Section */
 #main {
   margin-top: 65px;
