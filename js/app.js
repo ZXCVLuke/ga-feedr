@@ -56,6 +56,12 @@ var linkTemplate = Handlebars.compile(template2);
 
 // ready DOM
 $(function() {
+
+  $(document).on({
+    ajaxStart: function() { $("#popUp").removeClass("hidden"); },
+     ajaxStop: function() { $("#popUp").addClass("hidden"); }
+   });
+
   // get json feed from Mashable. heroku proxy required for CORS issue. Jquery proxy required to reset context from window to Feedr.
   $.get('https://accesscontrolalloworiginall.herokuapp.com/http://mashable.com/stories.json', $.proxy(Feedr.responseMashable, Feedr));
 
