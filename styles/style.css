@@ -219,8 +219,11 @@ nav ul ul li {
 
 .article .articleContent h3 {
   margin-bottom: 0;
-  color: #FE052C;
+  /*color: #FE052C;*/
 }
+
+.reddit .articleContent h3 { color: #FE052C }
+.mashable .articleContent h3 { color: #00aeef }
 
 .article .articleContent h6 {
   margin-top: 0;
