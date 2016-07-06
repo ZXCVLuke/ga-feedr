@@ -177,7 +177,7 @@ $(function() {
      ajaxStop: function() {
        // Hides popUp once ajax has loaded
        $("#popUp").addClass("hidden");
-       $(".closePopUp").show(); 
+       $(".closePopUp").show();
        // Sorts articles chronologically
        $(".article").sort(function(a,b){
          // Fixed this by swapping > for -. Not sure why this worked?
@@ -196,8 +196,14 @@ $(function() {
    });
 
   // get json feeds from Mashable, Reddit and Digg. heroku proxy required for CORS issue. Jquery proxy required to reset context from window to Feedr.
-  $.get('https://accesscontrolalloworiginall.herokuapp.com/http://mashable.com/stories.json', $.proxy(Feedr.responseMashable, Feedr));
-  $.get('https://www.reddit.com/top.json', $.proxy(Feedr.responseReddit, Feedr));
-  $.get('https://accesscontrolalloworiginall.herokuapp.com/http://digg.com/api/news/popular.json', $.proxy(Feedr.responseDigg, Feedr));
+  $.get('https://accesscontrolalloworiginall.herokuapp.com/http://mashable.com/stories.json', $.proxy(Feedr.responseMashable, Feedr))
+      .done(function(){ console.log( "loaded Mashable"); })
+      .fail(function() { alert( "error, failed to load Mashable" ); });
+  $.get('https://www.reddit.com/top.json', $.proxy(Feedr.responseReddit, Feedr))
+      .done(function(){ console.log( "loaded Reddit"); })
+      .fail(function() { alert( "error, failed to load Reddit" ); });
+  $.get('https://accesscontrolalloworiginall.herokuapp.com/http://digg.com/api/news/popular.json', $.proxy(Feedr.responseDigg, Feedr))
+      .done(function(){ console.log( "loaded Digg"); })
+      .fail(function() { alert( "error, failed to load Digg" ); });
 
 });
