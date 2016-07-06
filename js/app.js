@@ -150,6 +150,15 @@ var Feedr = {
       $('.article').show();
       $('#current-source').html('All');
     })
+  },
+
+  // Replaces Reddits missing images
+  swapDudImages : function() {
+    var r = "../images/redditlogo.png";
+    $('img[src=""]').attr("src", r);
+    $('img[src="default"]').attr("src", r);
+    $('img[src="self"]').attr("src", r);
+    $('img[src="nsfw"]').attr("src", r);
   }
 
 };
@@ -185,6 +194,8 @@ $(function() {
        }).each(function(){
          $("#main").prepend(this);
        })
+
+       Feedr.swapDudImages();
 
        // Set up article filters
        Feedr.filterArticles("mashable");
