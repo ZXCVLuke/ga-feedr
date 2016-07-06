@@ -175,12 +175,11 @@ var Feedr = {
   },
 
   openPopUp : function() {
-    $("#popUp").removeClass("hidden");
-    console.log(this);
+    $("#popUp").removeClass("hidden loader");
   },
 
   closePopUp : function() {
-    $("#popUp").addClass("hidden");
+    $("#popUp").addClass("hidden loader");
   }
 
 };
@@ -241,7 +240,8 @@ $(function() {
 
   // get json feeds from Mashable, Reddit and Digg. Display Mashable as default
   Feedr.getSourceMashable();
-  $('#reddit').on('click', Feedr.getSourceReddit);
-  $('#digg').on('click', Feedr.getSourceDigg);
+  // .one, rather than .on ensures it only runs once.
+  $('#reddit').one('click', Feedr.getSourceReddit);
+  $('#digg').one('click', Feedr.getSourceDigg);
 
 });
