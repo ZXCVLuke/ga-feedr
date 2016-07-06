@@ -172,6 +172,15 @@ var Feedr = {
     $.get('https://accesscontrolalloworiginall.herokuapp.com/http://digg.com/api/news/popular.json', $.proxy(Feedr.responseDigg, Feedr))
         .done(function(){ console.log( "loaded Digg"); })
         .fail(function() { alert( "error, failed to load Digg" ); });
+  },
+
+  openPopUp : function() {
+    $("#popUp").removeClass("hidden");
+    console.log(this);
+  },
+
+  closePopUp : function() {
+    $("#popUp").addClass("hidden");
   }
 
 };
@@ -225,6 +234,8 @@ $(function() {
        Feedr.filterArticles("digg");
        Feedr.showAllArticles();
 
+       $('article h3').on('click', Feedr.openPopUp);
+       $('.closePopUp').on('click', Feedr.closePopUp);
      }
    });
 
