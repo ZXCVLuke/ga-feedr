@@ -17,13 +17,6 @@ var Feedr = {
     articles: []
   },
 
-  // Converts date/time to ISO
-  convertDate : function (dateTime) {
-    var x = new Date(dateTime);
-    var d = x.toISOString();
-    return d;
-  },
-
   // create a function to handle the json response
   responseMashable : function(response) {
       // cponsole log json response
@@ -41,12 +34,12 @@ var Feedr = {
           articleCategory: result.channel,
           impressions: result.shares.total,
           description: result.content.plain,
-          dateTime: Feedr.convertDate(result.post_date)
+          dateTime: Utilities.convertDate(result.post_date)
         });
 
         // populate tamplate with article content
         var articleContents = { sourceName: "mashable",
-                                dateTime: Feedr.convertDate(result.post_date),
+                                dateTime: Utilities.convertDate(result.post_date),
                                 featuredImage: result.responsive_images[0].image,
                                 articleLink: result.link,
                                 articleTitle: result.title,
@@ -79,12 +72,12 @@ var Feedr = {
           impressions: result.data.ups,
           // description: result.
           // multiply by 1000 to adjust to milliseconds
-          dateTime: Feedr.convertDate(result.data.created_utc * 1000)
+          dateTime: Utilities.convertDate(result.data.created_utc * 1000)
         });
 
         // populate tamplate with article content
         var articleContents = { sourceName: "reddit",
-                                dateTime: Feedr.convertDate(result.data.created_utc * 1000),
+                                dateTime: Utilities.convertDate(result.data.created_utc * 1000),
                                 featuredImage: result.data.thumbnail,
                                 articleLink: "www.reddit.com" + result.data.permalink,
                                 articleTitle: result.data.title,
@@ -117,12 +110,12 @@ var Feedr = {
           impressions: result.digg_score,
           // description: result.
           // multiply by 1000 to adjust to milliseconds
-          dateTime: Feedr.convertDate(result.date_published * 1000)
+          dateTime: Utilities.convertDate(result.date_published * 1000)
         });
 
         // populate tamplate with article content
         var articleContents = { sourceName: "digg",
-                                dateTime: Feedr.convertDate(result.date_published * 1000),
+                                dateTime: Utilities.convertDate(result.date_published * 1000),
                                 featuredImage: result.content.media.images[0].url,
                                 articleLink: result.content.url,
                                 articleTitle: result.content.title,
@@ -152,15 +145,44 @@ var Feedr = {
     })
   },
 
-  // Replaces Reddits missing images
+  // Replaces Reddit's missing images. It still throws an error before replacing the image so would be good to fix properly.
   swapDudImages : function() {
     var r = "../images/redditlogo.png";
     $('img[src=""]').attr("src", r);
     $('img[src="default"]').attr("src", r);
     $('img[src="self"]').attr("src", r);
     $('img[src="nsfw"]').attr("src", r);
+  },
+
+  // get sources
+  // heroku proxy required for CORS issue. Jquery proxy required to reset context from window to Feedr.
+  getSourceMashable : function() {
+    $.get('https://accesscontrolalloworiginall.herokuapp.com/http://mashable.com/stories.json', $.proxy(Feedr.responseMashable, Feedr))
+        .done(function(){ console.log( "loaded Mashable"); })
+        .fail(function() { alert( "error, failed to load Mashable" ); });
+  },
+
+  getSourceReddit : function() {
+    $.get('https://www.reddit.com/top.json', $.proxy(Feedr.responseReddit, Feedr))
+        .done(function(){ console.log( "loaded Reddit"); })
+        .fail(function() { alert( "error, failed to load Reddit" ); });
+  },
+
+  getSourceDigg : function() {
+    $.get('https://accesscontrolalloworiginall.herokuapp.com/http://digg.com/api/news/popular.json', $.proxy(Feedr.responseDigg, Feedr))
+        .done(function(){ console.log( "loaded Digg"); })
+        .fail(function() { alert( "error, failed to load Digg" ); });
   }
 
+};
+
+var Utilities = {
+  // Converts date/time to ISO
+  convertDate : function (dateTime) {
+    var x = new Date(dateTime);
+    var d = x.toISOString();
+    return d;
+  },
 };
 
 
@@ -206,15 +228,9 @@ $(function() {
      }
    });
 
-  // get json feeds from Mashable, Reddit and Digg. heroku proxy required for CORS issue. Jquery proxy required to reset context from window to Feedr.
-  $.get('https://accesscontrolalloworiginall.herokuapp.com/http://mashable.com/stories.json', $.proxy(Feedr.responseMashable, Feedr))
-      .done(function(){ console.log( "loaded Mashable"); })
-      .fail(function() { alert( "error, failed to load Mashable" ); });
-  $.get('https://www.reddit.com/top.json', $.proxy(Feedr.responseReddit, Feedr))
-      .done(function(){ console.log( "loaded Reddit"); })
-      .fail(function() { alert( "error, failed to load Reddit" ); });
-  $.get('https://accesscontrolalloworiginall.herokuapp.com/http://digg.com/api/news/popular.json', $.proxy(Feedr.responseDigg, Feedr))
-      .done(function(){ console.log( "loaded Digg"); })
-      .fail(function() { alert( "error, failed to load Digg" ); });
+  // get json feeds from Mashable, Reddit and Digg. Display Mashable as default
+  Feedr.getSourceMashable();
+  $('#reddit').on('click', Feedr.getSourceReddit);
+  $('#digg').on('click', Feedr.getSourceDigg);
 
 });
