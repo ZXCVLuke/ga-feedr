@@ -74,11 +74,11 @@ var Feedr = {
         // push an object with all required article details for each article
         self.Reddit.articles.push({
           featuredImage: result.data.thumbnail,
-          articleLink: "www.reddit.com" + result.data.permalink,
+          articleLink: "http://www.reddit.com" + result.data.permalink,
           articleTitle: result.data.title,
           articleCategory: result.data.subreddit,
           impressions: result.data.ups,
-          // description: result.
+          description: "Reddit doesn't do body text. Click the button and check out the media",
           // multiply by 1000 to adjust to milliseconds
           dateTime: Utilities.convertDate(result.data.created_utc * 1000)
         });
@@ -87,7 +87,7 @@ var Feedr = {
         var articleContents = { sourceName: "reddit",
                                 dateTime: Utilities.convertDate(result.data.created_utc * 1000),
                                 featuredImage: result.data.thumbnail,
-                                articleLink: "www.reddit.com" + result.data.permalink,
+                                articleLink: "http://www.reddit.com" + result.data.permalink,
                                 articleTitle: result.data.title,
                                 articleCategory: result.data.subreddit,
                                 impressions: result.data.ups
@@ -116,7 +116,7 @@ var Feedr = {
           articleTitle: result.content.title,
           articleCategory: result.content.tags[0].display,
           impressions: result.digg_score,
-          // description: result.
+          description: result.content.description,
           // multiply by 1000 to adjust to milliseconds
           dateTime: Utilities.convertDate(result.date_published * 1000)
         });
@@ -182,13 +182,12 @@ var Feedr = {
         .fail(function() { alert( "error, failed to load Digg" ); });
   },
 
-  openPopUp : function(context) {
+  openPopUp : function(title, source) {
     $("#popUp").removeClass("hidden loader");
-    var contents = Utilities.findByProperty(context);
-    console.log(contents);
+    var contents = Feedr.findByProperty(title, source);
     // populate tamplate with article content
     var linkContents = {  articleLink: contents[1],
-                          articleTitle: context,
+                          articleTitle: title,
                           articleDescription: contents[0]
     };
 
@@ -201,8 +200,35 @@ var Feedr = {
   closePopUp : function() {
     $("#popUp").addClass("hidden loader");
     $("#popUp > .container").remove();
-  }
+  },
 
+  findByProperty : function(title, source) {
+    switch (source) {
+      case 'mashable':
+        for(var i = 0 ; i < Feedr.Mashable.articles.length; i++){
+          if(Feedr.Mashable.articles[i].hasOwnProperty("articleTitle") && Feedr.Mashable.articles[i].articleTitle === title) {
+            return [Feedr.Mashable.articles[i].description, Feedr.Mashable.articles[i].articleLink];
+          }
+        }
+        break;
+      case 'reddit':
+        for(var i = 0 ; i < Feedr.Reddit.articles.length; i++){
+          if(Feedr.Reddit.articles[i].hasOwnProperty("articleTitle") && Feedr.Reddit.articles[i].articleTitle === title) {
+            return [Feedr.Reddit.articles[i].description, Feedr.Reddit.articles[i].articleLink];
+          }
+        }
+        break;
+      case 'digg':
+        for(var i = 0 ; i < Feedr.Digg.articles.length; i++){
+          if(Feedr.Digg.articles[i].hasOwnProperty("articleTitle") && Feedr.Digg.articles[i].articleTitle === title) {
+            return [Feedr.Digg.articles[i].description, Feedr.Digg.articles[i].articleLink];
+          }
+        }
+        break;
+      default:
+        console.log("no match");
+    }
+  }
 };
 
 var Utilities = {
@@ -212,14 +238,6 @@ var Utilities = {
     var d = x.toISOString();
     return d;
   },
-
-  findByProperty : function( value ) {
-    for(var i = 0 ; i < Feedr.Mashable.articles.length; i++){
-      if(Feedr.Mashable.articles[i].hasOwnProperty("articleTitle") && Feedr.Mashable.articles[i].articleTitle === value) {
-        return [Feedr.Mashable.articles[i].description, Feedr.Mashable.articles[i].articleLink];
-      }
-    }
-  }
 
 };
 
@@ -258,8 +276,9 @@ $(function() {
        Feedr.showAllArticles();
 
        $('article h3').on('click', function(){
-            var that = this.innerHTML;
-            Feedr.openPopUp(that);
+            var title = this.innerHTML;
+            var source = this.getAttribute("class");
+            Feedr.openPopUp(title, source);
           });
        $('.closePopUp').on('click', Feedr.closePopUp);
      }
