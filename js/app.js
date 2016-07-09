@@ -184,11 +184,12 @@ var Feedr = {
 
   openPopUp : function(context) {
     $("#popUp").removeClass("hidden loader");
-    console.log(context);
+    var contents = Utilities.findByProperty(context);
+    console.log(contents);
     // populate tamplate with article content
-    var linkContents = {  articleLink: "link",
+    var linkContents = {  articleLink: contents[1],
                           articleTitle: context,
-                          articleDescription: "description"
+                          articleDescription: contents[0]
     };
 
     // complile and append template
@@ -211,6 +212,15 @@ var Utilities = {
     var d = x.toISOString();
     return d;
   },
+
+  findByProperty : function( value ) {
+    for(var i = 0 ; i < Feedr.Mashable.articles.length; i++){
+      if(Feedr.Mashable.articles[i].hasOwnProperty("articleTitle") && Feedr.Mashable.articles[i].articleTitle === value) {
+        return [Feedr.Mashable.articles[i].description, Feedr.Mashable.articles[i].articleLink];
+      }
+    }
+  }
+
 };
 
 
