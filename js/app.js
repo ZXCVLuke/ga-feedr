@@ -1,4 +1,12 @@
 
+// Set up Handlebars templates
+var template1 = $('#article-template').html();
+var articleTemplate = Handlebars.compile(template1);
+
+var template2 = $('#link-template').html();
+var linkTemplate = Handlebars.compile(template2);
+
+
 // Set up app object
 var Feedr = {
   // Mashable Object
@@ -174,12 +182,24 @@ var Feedr = {
         .fail(function() { alert( "error, failed to load Digg" ); });
   },
 
-  openPopUp : function() {
+  openPopUp : function(context) {
     $("#popUp").removeClass("hidden loader");
+    console.log(context);
+    // populate tamplate with article content
+    var linkContents = {  articleLink: "link",
+                          articleTitle: context,
+                          articleDescription: "description"
+    };
+
+    // complile and append template
+    var compiledLinkTemplate = linkTemplate(linkContents);
+    $("#popUp").append(compiledLinkTemplate)
+
   },
 
   closePopUp : function() {
     $("#popUp").addClass("hidden loader");
+    $("#popUp > .container").remove();
   }
 
 };
@@ -194,12 +214,6 @@ var Utilities = {
 };
 
 
-// Set up Handlebars templates
-var template1 = $('#article-template').html();
-var articleTemplate = Handlebars.compile(template1);
-
-var template2 = $('#link-template').html();
-var linkTemplate = Handlebars.compile(template2);
 
 // ready DOM
 $(function() {
@@ -233,7 +247,10 @@ $(function() {
        Feedr.filterArticles("digg");
        Feedr.showAllArticles();
 
-       $('article h3').on('click', Feedr.openPopUp);
+       $('article h3').on('click', function(){
+            var that = this.innerHTML;
+            Feedr.openPopUp(that);
+          });
        $('.closePopUp').on('click', Feedr.closePopUp);
      }
    });
