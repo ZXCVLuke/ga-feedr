@@ -138,6 +138,7 @@ var Feedr = {
       })
   },
 
+  // Displays only the articles from the source chosen
   filterArticles : function(source) {
     $('#' + source).on("click", function(){
       $('.article').not('.' + source).hide();
@@ -146,6 +147,7 @@ var Feedr = {
     })
   },
 
+  // Displays all articles when Feedr logo is clicked
   showAllArticles : function() {
     $('#feedr').on('click', function(){
       $('.article').show();
@@ -153,7 +155,7 @@ var Feedr = {
     })
   },
 
-  // Replaces Reddit's missing images. It still throws an error before replacing the image so would be good to fix properly.
+  // Replaces Reddit's missing images.
   swapDudImages : function() {
     var r = "../images/redditlogo.png";
     $('img[src=""]').attr("src", r);
@@ -231,6 +233,7 @@ var Feedr = {
   }
 };
 
+// General purpose utilities
 var Utilities = {
   // Converts date/time to ISO
   convertDate : function (dateTime) {
@@ -242,31 +245,32 @@ var Utilities = {
 };
 
 
-
 // ready DOM
 $(function() {
 
   // Whenever an ajax call is made, while it is being made this will fire the loader animation.
   $(document).on({
 
+    // while ajax is going...
     ajaxStart: function() {
        // Displays popUp while ajax is loading
        $("#popUp").removeClass("hidden");
        $(".closePopUp").hide();
     },
 
+    // while ajax isn't going...
      ajaxStop: function() {
        // Hides popUp once ajax has loaded
        $("#popUp").addClass("hidden");
        $(".closePopUp").show();
        // Sorts articles chronologically
        $(".article").sort(function(a,b){
-         // Fixed this by swapping > for -. Not sure why this worked?
          return new Date($(a).attr("data-date")) - new Date($(b).attr("data-date"));
        }).each(function(){
          $("#main").prepend(this);
        })
 
+       // Replace Reddits dud or missing images
        Feedr.swapDudImages();
 
        // Set up article filters
@@ -275,6 +279,7 @@ $(function() {
        Feedr.filterArticles("digg");
        Feedr.showAllArticles();
 
+       // Trigger pop up on articles
        $('article h3').on('click', function(){
             var title = this.innerHTML;
             var source = this.getAttribute("class");
@@ -289,5 +294,33 @@ $(function() {
   // .one, rather than .on ensures it only runs once.
   $('#reddit').one('click', Feedr.getSourceReddit);
   $('#digg').one('click', Feedr.getSourceDigg);
+
+  // Toggle search field on click
+  $('#search-button').on('click', function(){
+    $('#search').toggleClass('active');
+  });
+
+  // Toggle search click on <enter>
+  $(document).keypress(function(e) {
+    if(e.which == 13) {
+      $('#search').toggleClass('active');
+    }
+  });
+
+  // captures query on each character
+  $('input').on('input', function(){
+    var query = ($('input').val());
+
+    // Sorts articles based on search query
+    $(".article").sort(function(a,b){
+
+      var x = $( a ).text().indexOf( query ) > -1;
+      var y = $( b ).text().indexOf( query ) > -1;
+      return x < y ? -1 : x > y ? 1 : 0;
+
+    }).each(function(){
+      $("#main").prepend(this);
+    })
+  });
 
 });
